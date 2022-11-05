@@ -50,7 +50,7 @@ startGame = False
 scores = [0,0]
 
 while True:
-    imgBG = cv2.imread("src/BG.png")
+    imgBG = cv2.imread("src/Background.png")
     success, img = cap.read()
 
     imgScaled = cv2.resize(img, (0,0), None, 0.875, 0.875)
@@ -65,39 +65,37 @@ while True:
 
         if stateResult is False:
             timer = time.time() - intialTime
-            cv2.putText(imgBG, str(int(timer)),(605,435), cv2.FONT_HERSHEY_PLAIN, 6, (255,0,255), 4)
+            cv2.putText(imgBG, str(int(timer)),(605,435), cv2.FONT_HERSHEY_PLAIN, 6, (255,182,56), 4)
 
         if timer > 3:
             stateResult = True
             timer = 0
+
+            AIMove = getAIRPSMove()
+            imgAI = cv2.imread(f'src/{AIMove}.png', cv2.IMREAD_UNCHANGED)
+            imgBG = cvzone.overlayPNG(imgBG, imgAI, (149, 310))
 
             if hands:
                 hand = hands[0]
                 fingers = detector.fingersUp(hand)
                 playerMove = getRPSMove(fingers)
 
-                AIMove = getAIRPSMove()
-                imgAI = cv2.imread(f'src/{AIMove}.png', cv2.IMREAD_UNCHANGED)
-                imgBG = cvzone.overlayPNG(imgBG, imgAI, (149,310))
 
                 print(AIMove)
                 print(playerMove)
                 if playerMove != None:
                     if CheckRPSWinner(RPS_Move(AIMove), playerMove) == RPS_Result.PLAYER1_WIN: scores[0]+=1
                     elif CheckRPSWinner(RPS_Move(AIMove), playerMove) == RPS_Result.PLAYER2_WIN: scores[1]+=1
-                else: cv2.putText(imgBG, "NO MOVE",(605,435), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 2)
-
-
-
-
-
-
+            else:
+                NoMove = True
+                cv2.putText(imgBG, "NO MOVE",(530,420), cv2.FONT_HERSHEY_PLAIN, 6, (255,182,56), 4)
 
 
     imgBG[234:654,795:1195] = imgScaled
 
     if stateResult:
         imgBG = cvzone.overlayPNG(imgBG, imgAI, (149, 310))
+        if NoMove: cv2.putText(imgBG, "NO MOVE", (530, 420), cv2.FONT_HERSHEY_PLAIN, 3, (255,182,56), 2)
 
     cv2.putText(imgBG, str(scores[0]), (410, 215), cv2.FONT_HERSHEY_PLAIN, 4, (255, 255, 255), 6)
     cv2.putText(imgBG, str(scores[1]), (1112, 215), cv2.FONT_HERSHEY_PLAIN, 4, (255, 255, 255), 6)
@@ -108,6 +106,7 @@ while True:
     key = cv2.waitKey(1)
 
     if key == ord('s'):
+        NoMove = False
         startGame = True
         intialTime = time.time()
         stateResult = False
