@@ -55,7 +55,7 @@ startGame = False
 scores = [0,0]
 
 while True:
-    imgBG = cv2.imread("src/Mustafa Background.png")
+    imgBG = cv2.imread("src/Background.png")
     success, img = cap.read()
 
     imgScaled = cv2.resize(img, (0,0), None, 0.875, 0.875)
