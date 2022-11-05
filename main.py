@@ -35,6 +35,11 @@ def CheckRPSWinner(move1, move2):
     if move1 == RPS_Move.PAPER and move2 == RPS_Move.SCISSORS: return RPS_Result.PLAYER2_WIN
     else: return RPS_Result.PLAYER2_WIN if CheckRPSWinner(move2, move1) == RPS_Result.PLAYER1_WIN else RPS_Result.PLAYER1_WIN
 
+def getMoveString(move):
+    if move == RPS_Move.ROCK: return "Rock"
+    if move == RPS_Move.PAPER: return "Paper"
+    if move == RPS_Move.SCISSORS: return  "Scissors"
+    return "No Move"
 
 H, W = 3, 4
 
@@ -50,7 +55,7 @@ startGame = False
 scores = [0,0]
 
 while True:
-    imgBG = cv2.imread("src/Background.png")
+    imgBG = cv2.imread("src/Mustafa Background.png")
     success, img = cap.read()
 
     imgScaled = cv2.resize(img, (0,0), None, 0.875, 0.875)
@@ -58,8 +63,19 @@ while True:
 
 
     # Find Hands
-    hands, img = detector.findHands(imgScaled)
+    hands = detector.findHands(imgScaled,draw=False)
 
+    if hands:
+        hand = hands[0]
+        fingers = detector.fingersUp(hand)
+        playerMove = getRPSMove(fingers)
+
+        cv2.rectangle(imgScaled, (hand["bbox"][0] - 20, hand["bbox"][1] - 20),
+                      (hand["bbox"][0] + hand["bbox"][2] + 20, hand["bbox"][1] + hand["bbox"][3] + 20),
+                      (255, 182, 56), 2)
+        cv2.putText(imgScaled, getMoveString(playerMove), (hand["bbox"][0] - 30, hand["bbox"][1] - 30),
+                    cv2.FONT_HERSHEY_PLAIN,
+                    2, (255, 182, 56), 2)
 
     if startGame:
 
@@ -76,16 +92,11 @@ while True:
             imgBG = cvzone.overlayPNG(imgBG, imgAI, (149, 310))
 
             if hands:
-                hand = hands[0]
-                fingers = detector.fingersUp(hand)
-                playerMove = getRPSMove(fingers)
 
-
-                print(AIMove)
-                print(playerMove)
-                if playerMove != None:
+                if playerMove in [RPS_Move.PAPER, RPS_Move.ROCK, RPS_Move.SCISSORS]:
                     if CheckRPSWinner(RPS_Move(AIMove), playerMove) == RPS_Result.PLAYER1_WIN: scores[0]+=1
                     elif CheckRPSWinner(RPS_Move(AIMove), playerMove) == RPS_Result.PLAYER2_WIN: scores[1]+=1
+
             else:
                 NoMove = True
                 cv2.putText(imgBG, "NO MOVE",(530,420), cv2.FONT_HERSHEY_PLAIN, 6, (255,182,56), 4)
