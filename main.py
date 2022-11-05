@@ -121,4 +121,6 @@ while True:
         startGame = True
         intialTime = time.time()
         stateResult = False
+    if key == ord('q'):
+        break
 
