@@ -43,7 +43,7 @@ def getMoveString(move):
 
 H, W = 3, 4
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("https://192.168.1.11:4343/video")
 cap.set(H, 640)
 cap.set(W, 480)
 
